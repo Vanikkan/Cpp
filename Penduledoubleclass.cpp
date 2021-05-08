@@ -1,200 +1,252 @@
 #include <iostream>
 #include <cmath>
-#include <iomanip>
 #include <fstream>
+
 
 using namespace std;
 
-//On va passer par une classe
+//On va commencer par déclarer la classe point, qui va nous permettre de générer notre pendule: 
 
-class eqd {
-public:
-  double theta, dtheta, alpha, dalpha, M1, M2,  t, h, T, g, l1, l2, ktheta1, kalpha1, kdtheta1, kdalpha1, ktheta2, kalpha2, kdtheta2, kdalpha2, ktheta3, kalpha3, kdtheta3, kdalpha3, ktheta4, kalpha4, kdtheta4, kdalpha4 ;
-
-  double F(double t, double dtheta, double dalpha, double theta, double alpha) {
-    return (pow(dtheta,2)*M2*l1*cos((alpha-theta)*M_PI/180)*sin((alpha-theta)*M_PI/180)+pow(dalpha,2)*M2*l2*sin((alpha-theta)*M_PI/180)-(M1+M2)*g*sin(theta*M_PI/180)+M2*cos((alpha-theta)*M_PI/180)*g*sin(alpha*M_PI/180))/((M1+M2)*l1-M2*l1*pow(cos((alpha-theta)*M_PI/180),2));
-  }
+class point{
   
-  double G(double t, double dtheta, double dalpha, double theta, double alpha) {
-    return (-pow(dalpha,2)*M2*l2*cos((alpha-theta)*M_PI/180)*sin((alpha-theta)*M_PI/180)+(M1+M2)*(g*sin(theta*M_PI/180)*cos((alpha-theta)*M_PI/180)-l1*pow(dtheta,2)*sin((alpha-theta)*M_PI/180)-g*sin(alpha*M_PI/180)))/((M1+M2)*l2-M2*l2*pow(cos((alpha-theta)*M_PI/180),2));
-  }
+public: //On commence par déclarer les variables qui materialiserons le point.
+
+  //On peut également ici définir l'angle en degrès que fera le pendule avec la verticale:
+  double Theta;
+  
+  //La dérivée de la fonction angle par rapport au temps
+  double dTheta;
+
+  //Les coordonnées cartesiennes de notre point
+
+  double x,y; 
+
+  //La distance du point par rapport à l'origine (la longueurs du pendule)
+  double l;
+
+  //La masse de la amsse asscoié à ce point;
+  double m; 
+
+  //On définis maintenant les constructeurs associé à cette classe point:
+  
+  point(); //Le constructeur: il va "créer" l'objet "point" quand celui ci sera appellé: il prépare la RAM a recevoir des instructions. 
+  point( double, double, double, double ); // On déclare la fonction point associé au constructeur point.
+  
+  //Ici on aura deux pendule identiques. On peut donc utiliser un constructeur de copie, qui va nous permettre de copier le point déjà définis à la ligne d'au dessus.
+  
+  point ( point &);//Constructeur de copie
+  
+  void init(double, double, double, double); //On crée la fonction initialisation qui va initialiser nos variables
+
+  //On déclare maintenant les variables au moyen de la commande "Get", ce sont nos accesseurs; ils vont nous permettre d'acceder aux données de notre classe privée. 
+  //On leur attribut la variable qu'il devront retourner. La commande "const" permet de fixer ces variables, car on ne veut pas de variables dynamique ici. 
+
+  double GetTheta()  {return Theta;}
+  double GetdTheta() {return dTheta;}
+  double Getl()  {return l;}
+  double Getm()  {return m;}
+  double Getx() {return l*sin(Theta*M_PI/180.0);}
+  double Gety() {return -l*cos(Theta*M_PI/180.0);}
+
+  //On passe maintenant aux mutateurs. Ce sont des fonctions membres qui permettent d'attribuer et de changer la valeur d'une variable protégée. Cela nous permet ici d'initialiser nos variables.  
+
+
+  double Setx(double x0) {return x=x0;}
+  double Sety(double y0) {return y=y0;}
+  double SetTheta(double Theta0) {return Theta=Theta0;}
+  double SetdTheta(double dTheta0) {return dTheta=dTheta0;}
+  double Setl(double l0) {return l=l0;}
+  double Setm(double m0) {return m=m0;}
+
+
+
+  
 };
-//On declare la classe point
 
-class point {
-  
- public:
-  double x, y;
+//Maintenant, on va initialiser nos fonctions membres.
 
+//On commence par initialiser la fonction de notre premier point.
+
+  point::point(  double Theta0, double dTheta0, double l0, double m0) {
+ 
+    Theta=Theta0;
+    dTheta=dTheta0;
+    l=l0;
+    m=m0;
+  };
+ 
+//On définis maintenant notre constructeur de copie.
+
+point::point( point &point2){
+
+  Theta=point2.GetTheta();
+  dTheta=point2.GetdTheta();
+  l=point2.Getl();
+  m=point2.Getl();
 };
 
-int main () {
-  //On déclare nos points
-  point A;
-  point B;
-  point C;
-  
-  //On déclare la classe utilisé
-  eqd eqd1;
-  
-  //On déclare nos variables:
+// Pour éviter tout problème, on va demander à notre programme de commencer par initialiser toutes les variables de la classe point à 0 par défaut.
 
-  //PAS
-  eqd1.h=0.1;
-  
-  eqd1.g=9.81;
-  //Longeurs des deux fils
-  eqd1.l1=1;
-  eqd1.l2=2;
-  
-  //Masse des deux masses 
-  eqd1.M1=25;
-  eqd1.M2=25;
-  
-  //Conditions initiales pour le premier pendule
-  eqd1.theta=45;
-  eqd1.alpha=45;
-  
-  //Conditions initiale pour le deuxième pendule
-  eqd1.dtheta=0;
-  eqd1.dalpha=0;
-  
-  //Conditions de temps
-  eqd1.t=0;
-  eqd1.T=100;
-  
-  //Déclaration variable RK4
-  eqd1.ktheta1;
-  eqd1.kalpha1;
-  eqd1.kdtheta1;
-  eqd1.kdalpha1;
-
-  eqd1.ktheta2;
-  eqd1.kalpha2;
-  eqd1.kdtheta2;
-  eqd1.kdalpha2;
-
-  eqd1.ktheta3;
-  eqd1.kalpha3;
-  eqd1.kdtheta3;
-  eqd1.kdalpha3;
-
-  eqd1.ktheta4;
-  eqd1.kalpha4;
-  eqd1.kdtheta4;
-  eqd1.kdalpha4;
-  
-  A.x=0;
-  A.y=0;
-  
-  B.x=eqd1.l1*sin(eqd1.theta*M_PI/180);
-  B.y=-eqd1.l1*cos(eqd1.theta*M_PI/180);
-
-  C.x=eqd1.l1*sin(eqd1.theta*M_PI/180)+eqd1.l2*sin(eqd1.alpha*M_PI/180);
-  C.y=-eqd1.l1*cos(eqd1.theta*M_PI/180)-eqd1.l2*cos(eqd1.alpha*M_PI/180);
-  
-  ofstream fichier {"pendule_double.out"};
-  ofstream fichier1{"pendule_double_point.out"};
-  //Solveur
-  
-  while (eqd1.t<=eqd1.T)
-    {
-      /*
-  eqd1.ktheta1=eqd1.dtheta*eqd1.h;
-  eqd1.kalpha1=eqd1.dalpha*eqd1.h;
-  eqd1.kdtheta1=eqd1.F(eqd1.t, eqd1.theta, eqd1.alpha, eqd1.dtheta, eqd1.dalpha)*eqd1.h;
-  eqd1.kdalpha1=eqd1.G(eqd1.t, eqd1.theta, eqd1.alpha, eqd1.dtheta, eqd1.dalpha)*eqd1.h;
+point::point(){
 
   
-  eqd1.ktheta2=(eqd1.dtheta+eqd1.kdtheta1/2.)*eqd1.h;
-  eqd1.kalpha2=(eqd1.dalpha+eqd1.kdalpha1/2.)*eqd1.h;
-  eqd1.kdtheta2=eqd1.F(eqd1.t+ eqd1.h*0.5, eqd1.theta+eqd1.ktheta1*0.5, eqd1.alpha+eqd1.kalpha1*0.5, eqd1.dtheta+eqd1.kdtheta1*0.5, eqd1.dalpha+eqd1.kdalpha1*0.5)*eqd1.h;
-  eqd1.kdtheta2=eqd1.G(eqd1.t+ eqd1.h*0.5, eqd1.theta+eqd1.ktheta1*0.5, eqd1.alpha+eqd1.kalpha1*0.5, eqd1.dtheta+eqd1.kdtheta1*0.5, eqd1.dalpha+eqd1.kdalpha1*0.5)*eqd1.h;
+  Theta=0;
+  dTheta=0;
+  l=0;
+  m=0;
+};
+
+// On initialise notre classe point, maintenant que l'on part bien de 0.
+
+void point::init( double Theta0, double dTheta0, double l0, double m0){
+
+   
+    Theta=Theta0;
+    dTheta=dTheta0;
+    l=l0;
+    m=m0;
+};
+
+  //Equations differentiels double pendule 
+double F( double g, double  M1, double M2, double L1, double L2, double theta, double dtheta, double alpha, double dalpha){
+  
+  return (dtheta*dtheta*M2*L1*cos((alpha-theta)*M_PI/180)*sin((alpha-theta)*M_PI/180)+dalpha*dalpha*M2*L2*sin((alpha-theta)*M_PI/180)-(M1+M2)*g*sin(theta*M_PI/180)+M2*cos((alpha-theta)*M_PI/180)*g*sin(alpha*M_PI/180))/((M1+M2)*L1-M2*L1*cos((alpha-theta)*M_PI/180)*cos((alpha-theta)*M_PI/180));
+    
+  };
+  
+double G( double g, double  M1, double M2, double L1, double L2, double theta, double dtheta, double alpha, double dalpha){
+  
+  return (-dalpha*dalpha*M2*L2*cos((alpha-theta)*M_PI/180)*sin((alpha-theta)*M_PI/180)+(M1+M2)*(g*sin(theta*M_PI/180)*cos((alpha-theta)*M_PI/180)-L1*dtheta*dtheta*sin((alpha-theta)*M_PI/180)-g*sin(alpha*M_PI/180)))/((M1+M2)*L2-M2*L2*cos((alpha-theta)*M_PI/180)*cos((alpha-theta)*M_PI/180));
+    
+  };
+
+//On peut maintenant passer au main.
+
+int main(){
+  double g=9.81; 
+  double t=0; //Le temps
+  double h=0.001; //Le pas de RK4
+  double T=10;  //Le temps maximum.  
+
+  //On initialise les grandeurs utilisé dans RK4.
+
+  double kx1=0, ky1=0, ku1=0, kv1=0;
+  double kx2=0, ky2=0, ku2=0, kv2=0;
+  double kx3=0, ky3=0, ku3=0, kv3=0;
+  double kx4=0, ky4=0, ku4=0, kv4=0;
+  
+//On définis ici les grandeurs qui vont caractériser nos deux point;
+
+  //Le premier point A, symbolisant la première masse.
+  double Theta1, dTheta1, l1, m1;
+
+  //Le deuxième point B, symbolisant la deuxième masse.
+
+  double Theta2, dTheta2, l2, m2; 
+
+  //On peut pour plus de modularité inscrire ces grandeurs dans un fichier de donnée.
+
+  ifstream fichier("cond_init.txt"); 
+
+  //On en profite pour définir les deux fichiers de sortie (Pour les angles, et les coordonnées).
+
+  ofstream fichier1("pendule_double.out");
+  ofstream fichier2("pendule_double_point.out");
+
+  //Grace à notre fichier d'initialisation, on peut attribuer des valeurs à nos différentes variables caractérisant nos points. 
+  fichier>>Theta1>>dTheta1>>l1>>m1;
+  fichier>>Theta2>>dTheta2>>l2>>m2;
+ 
+  //Passons maintenant à la création de notre double pendule. On commence par définir un point origine, qui sers de point d'ancrage au premier pendule.
+  double xo=0;
+  double yo=0;
+  
+  //On créer ensuite nos deux points grace à la classe point.
+  
+  point A(Theta1, dTheta1, l1, m1); 
+  point B(Theta2, dTheta2, l2, m2); 
+
+  //On initialise ces deux points.
+
+  A.init(Theta1, dTheta1, l1, m1);
+  B.init(Theta2, dTheta2, l2, m2);
+  
+  //On affiche ces grandeurs pour voir si l'initialisation à partir du fichier d'entrée s'est bien faite.
+
+  cout<<"Theta1= "<<Theta1<<"dTheta1= "<<"l1= "<<l1<<"m1= "<<m1<<endl; 
+  cout<<"Theta1= "<<Theta1<<"dTheta1= "<<"l1= "<<l1<<"m1= "<<m1<<endl; 
+
+  //On passe maintenant à la méthode de résolution RK4 pour l'ordre 2 pour les équa diff couplé.
+
+  while (t<=T){
+
+  kx1=A.GetdTheta()*h;
+  ky1=B.GetdTheta()*h;
+  ku1=F( g, A.Getm(), B.Getm(), A.Getl() , B.Getl(), A.GetTheta(), A.GetdTheta(), B.GetTheta(), B.GetdTheta())*h;
+  kv1=G( g, A.Getm(), B.Getm(), A.Getl() , B.Getl(), A.GetTheta(), A.GetdTheta(), B.GetTheta(), B.GetdTheta())*h;
+  
+  kx2=(A.GetdTheta()+(1/2.0)*ku1)*h;
+  ky2=(B.GetdTheta()+(1/2.0)*kv1)*h;
+  ku2=F( g, A.Getm(), B.Getm(), A.Getl() , B.Getl(), A.GetTheta()+kx1/2.0, A.GetdTheta()+ky1/2.0, B.GetTheta()+ku1/2.0, B.GetdTheta()+kv1/2.0)*h;
+  kv2=G( g, A.Getm(), B.Getm(), A.Getl() , B.Getl(), A.GetTheta()+kx1/2.0, A.GetdTheta()+ky1/2.0, B.GetTheta()+ku1/2.0, B.GetdTheta()+kv1/2.0)*h;
+ 
+  kx3=(A.GetdTheta()+(1/2.0)*ku2)*h;
+  ky3=(B.GetdTheta()+(1/2.0)*kv2)*h;
+  ku3=F( g, A.Getm(), B.Getm(), A.Getl() , B.Getl(), A.GetTheta()+kx2/2.0, A.GetdTheta()+ky2/2.0, B.GetTheta()+ku2/2.0, B.GetdTheta()+kv2/2.0)*h;
+  kv3=G( g, A.Getm(), B.Getm(), A.Getl() , B.Getl(), A.GetTheta()+kx2/2.0, A.GetdTheta()+ky2/2.0, B.GetTheta()+ku2/2.0, B.GetdTheta()+kv2/2.0)*h;
  
   
-  eqd1.ktheta3=(eqd1.dtheta+eqd1.kdtheta2*0.5)*eqd1.h;
-  eqd1.kalpha3=(eqd1.dalpha+eqd1.kdalpha2*0.5)*eqd1.h;
-  eqd1.kdtheta3=eqd1.F(eqd1.t+ eqd1.h*0.5, eqd1.theta+eqd1.ktheta2*0.5, eqd1.alpha+eqd1.kalpha2*0.5, eqd1.dtheta+eqd1.kdtheta2*0.5, eqd1.dalpha+eqd1.kdalpha2*0.5)*eqd1.h;
-  eqd1.kdtheta3=eqd1.G(eqd1.t+ eqd1.h*0.5, eqd1.theta+eqd1.ktheta2*0.5, eqd1.alpha+eqd1.kalpha2*0.5, eqd1.dtheta+eqd1.kdtheta2*0.5, eqd1.dalpha+eqd1.kdalpha2*0.5)*eqd1.h;
- 
-  
-  eqd1.ktheta4=(eqd1.dtheta+eqd1.kdtheta3)*eqd1.h;
-  eqd1.kalpha4=(eqd1.dalpha+eqd1.kdalpha3)*eqd1.h;
-  eqd1.kdtheta4=eqd1.F(eqd1.t+ eqd1.h, eqd1.theta+eqd1.ktheta3, eqd1.alpha+eqd1.kalpha3, eqd1.dtheta+eqd1.kdtheta3, eqd1.dalpha+eqd1.kdalpha3)*eqd1.h;
-  eqd1.kdtheta4=eqd1.G(eqd1.t+ eqd1.h, eqd1.theta+eqd1.ktheta3, eqd1.alpha+eqd1.kalpha3, eqd1.dtheta+eqd1.kdtheta3, eqd1.dalpha+eqd1.kdalpha3)*eqd1.h;
- 
-  
-  eqd1.theta=eqd1.theta+(eqd1.ktheta1+2*eqd1.ktheta2+2*eqd1.ktheta3+eqd1.ktheta4)*0.166;
-  eqd1.alpha=eqd1.alpha+(eqd1.kalpha1+2*eqd1.kalpha2+2*eqd1.kalpha3+eqd1.kalpha4)*0.166;
-  eqd1.dtheta=eqd1.dtheta+(eqd1.kdtheta1+2*eqd1.kdtheta2+2*eqd1.kdtheta3+eqd1.kdtheta4)*0.166;
-  eqd1.dalpha=eqd1.dalpha+(eqd1.kdalpha1+2*eqd1.kdalpha2+2*eqd1.kdalpha3+eqd1.kdalpha4)*0.166;
-      */
-       double k1=eqd1.F(eqd1.t,eqd1.dtheta,eqd1.dalpha,eqd1.theta,eqd1.alpha);
-    double j1=eqd1.G(eqd1.t,eqd1.dtheta,eqd1.dalpha,eqd1.theta,eqd1.alpha);
-    double b1=eqd1.dtheta;
-    double p1=eqd1.dalpha;
-    
-    //2eme coefficient
-    double k2=eqd1.F(eqd1.t,eqd1.dtheta+eqd1.h/2.*k1,eqd1.dalpha+eqd1.h/2.*j1,eqd1.theta+eqd1.h/2*b1,eqd1.alpha+eqd1.h/2.*p1);
-    double j2=eqd1.G(eqd1.t,eqd1.dtheta+eqd1.h/2.*k1,eqd1.dalpha+eqd1.h/2.*j1,eqd1.theta+eqd1.h/2*b1,eqd1.alpha+eqd1.h/2.*p1);
-    double b2=eqd1.dtheta+eqd1.h/2.*b1;
-    double p2=eqd1.dalpha+eqd1.h/2.*p1;
-    
-    //3eme coefficient
-    double k3=eqd1.F(eqd1.t,eqd1.dtheta+eqd1.h/2.*k2,eqd1.dalpha+eqd1.h/2.*j2,eqd1.theta+eqd1.h/2.*b2,eqd1.alpha+eqd1.h/2.*p2);
-    double j3=eqd1.G(eqd1.t,eqd1.dtheta+eqd1.h/2.*k2,eqd1.dalpha+eqd1.h/2.*j2,eqd1.theta+eqd1.h/2.*b2,eqd1.alpha+eqd1.h/2.*p2);
-    double b3=eqd1.dtheta+eqd1.h/2.*b2;
-    double p3=eqd1.dalpha+eqd1.h/2.*p2;
-    
-    //4eme coefficient
-    double k4=eqd1.F(eqd1.t,eqd1.dtheta+eqd1.h*k3,eqd1.dalpha+eqd1.h*j3,eqd1.theta+eqd1.h*b3,eqd1.alpha+eqd1.h*p3);
-    double j4=eqd1.G(eqd1.t,eqd1.dtheta+eqd1.h*k3,eqd1.dalpha+eqd1.h*j3,eqd1.theta+eqd1.h*b3,eqd1.alpha+eqd1.h*p3);
-    double b4=eqd1.dtheta+eqd1.h*b3;
-    double p4=eqd1.dalpha+eqd1.h*p3;
-    
-    //valeur
-    eqd1.dtheta=eqd1.dtheta+eqd1.h/6.*(k1+2*k2+2*k3+k4);
-    eqd1.dalpha=eqd1.dalpha+eqd1.h/6.*(j1+2*j2+2*j3+j4);
-    eqd1.theta = eqd1.theta+eqd1.h/6.*(b1+2*b2+2*b3+b4);
-    eqd1.alpha =eqd1.alpha+eqd1.h/6.*(p1+2*p2+2*p3+p4);
-    
-  B.x=eqd1.l1*sin(eqd1.theta*M_PI/180);
-  B.y=-eqd1.l1*cos(eqd1.theta*M_PI/180);
+  kx4=(A.GetdTheta()+ku3)*h;
+  ky4=(B.GetdTheta()+kv3)*h;
+  ku4=F( g, A.Getm(), B.Getm(), A.Getl() , B.Getl(), A.GetTheta()+kx3, A.GetdTheta()+ky3, B.GetTheta()+ku3, B.GetdTheta()+kv3)*h;
+  kv4=G( g, A.Getm(), B.Getm(), A.Getl() , B.Getl(), A.GetTheta()+kx3, A.GetdTheta()+ky3, B.GetTheta()+ku3, B.GetdTheta()+kv3)*h;
 
-  C.x=eqd1.l1*sin(eqd1.theta*M_PI/180)+eqd1.l2*sin(eqd1.alpha*M_PI/180);
-  C.y=-eqd1.l1*cos(eqd1.theta*M_PI/180)-eqd1.l2*cos(eqd1.alpha*M_PI/180);
+  A.Theta+=(kx1+2*kx2+2*kx3+kx4)/6.0;
+  B.Theta+=(ky1+2*ky2+2*ky3+ky4)/6.0;
+  A.dTheta+=(ku1+2*ku2+2*ku3+ku4)/6.0;
+  B.dTheta+=(kv1+2*kv2+2*kv3+kv4)/6.0;
 
-  fichier<<"  "<<eqd1.t<<"  "<<eqd1.theta<<"  "<<eqd1.alpha<<" "<<eqd1.dtheta<<" "<<eqd1.dalpha<<endl;
-
-  fichier1<<" "<<A.x<<" "<<A.y<<endl;
-  fichier1<<" "<<B.x<<" "<<B.y<<endl;
-  fichier1<<" "<<C.x<<" "<<C.y<<endl;
+  fichier1<<" "<<t<<" "<<A.Theta<<" "<<A.dTheta<<endl; 
+  fichier1<<" "<<t<<" "<<B.Theta<<" "<<B.dTheta<<endl; 
   fichier1<<" "<<endl;
-  fichier1<<" "<<endl;
-  
-  cout<<" "<<eqd1.t<<endl;
+  fichier1<<" "<<endl; 
+  t+=h; 
 
-  eqd1.t=eqd1.t+eqd1.h;
-  
- }
-  
-    ofstream animation("animationpendule.gnu"); // création du fichier de sortie pour le gif
+  A.x=A.Getx();
+  A.y=A.Gety();
+  B.x=A.Getx()+B.Getx();
+  B.y=A.Gety()+B.Gety();
+
+  fichier2<<" "<<t<<" "<<xo<<" "<<yo<<endl;
+  fichier2<<" "<<t<<" "<<A.x<<" "<<A.y<<endl; 
+  fichier2<<" "<<t<<" "<<B.x<<" "<<B.y<<endl; 
+  fichier2<<" "<<endl;
+  fichier2<<" "<<endl; 
+
+  };
+  // Création du gif
+   ofstream animation("animationpendule.gnu"); // création du fichier de sortie pour le gif
 
     animation<<"set title \"Animation du pendule au cours du temps\""<<endl;
-    animation<<"set terminal gif animate delay "<<eqd1.h*20<<endl;
+    animation<<"set terminal gif animate delay "<<h/100<<endl;
     animation<<"set output \"penduleanime.gif\"" <<endl;
-    animation<<"set xrange ["<<-(eqd1.l1+eqd1.l2)<<":"<<(eqd1.l1+eqd1.l2)<<"]"<<endl; //Permet d'adapter la fenetre à la longeur des fils en x
+    animation<<"set xrange ["<<-(A.Getl()+B.Getl())<<":"<<(A.Getl()+B.Getl())<<"]"<<endl; //Permet d'adapter la fenetre à la longeur des fils en x
    
-    animation<<"set yrange ["<<-(eqd1.l1+eqd1.l2)<<":"<<(eqd1.l1+eqd1.l2)<<"]"<<endl; //Permet d'adapter la fenetre à la longeur des fils en y
+    animation<<"set yrange ["<<-(A.Getl()+B.Getl())<<":"<<(A.Getl()+B.Getl())<<"]"<<endl; //Permet d'adapter la fenetre à la longeur des fils en y
    
  
    
     animation<<"set tics nomirror"<<endl; //Impossible d'avoir une image qui apparait 2 fois
     animation<<"set pointintervalbox 3"<<endl; //Définis un style de ligne
-    animation<<"do for [i=1:999] {plot \"pendule_double_point.out\" index i using 1:2  title 'double-pendule' w linespoints ls 1}"<<endl;
+    animation<<"do for [i=1:999] {plot \"pendule_double_point.out\" index i using 2:3  title 'double-pendule' w linespoints ls 1}"<<endl;
 
     system("gnuplot animationpendule.gnu");
     
     
- return 0;
+
+
+
+
+  
+
 }
