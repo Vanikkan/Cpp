@@ -110,13 +110,13 @@ void point::init( double Theta0, double dTheta0, double l0, double m0){
   //Equations differentiels double pendule 
 double F( double g, double  M1, double M2, double L1, double L2, double theta, double dtheta, double alpha, double dalpha){
   
-  return (dtheta*dtheta*M2*L1*cos((alpha-theta)*M_PI/180)*sin((alpha-theta)*M_PI/180)+dalpha*dalpha*M2*L2*sin((alpha-theta)*M_PI/180)-(M1+M2)*g*sin(theta*M_PI/180)+M2*cos((alpha-theta)*M_PI/180)*g*sin(alpha*M_PI/180))/((M1+M2)*L1-M2*L1*cos((alpha-theta)*M_PI/180)*cos((alpha-theta)*M_PI/180));
+  return (dtheta*dtheta*M2*L1*cos((alpha-theta))*sin((alpha-theta))+dalpha*dalpha*M2*L2*sin((alpha-theta))-(M1+M2)*g*sin(theta)+M2*cos((alpha-theta))*g*sin(alpha))/((M1+M2)*L1-M2*L1*cos((alpha-theta)*M_PI/180)*cos((alpha-theta)*M_PI/180));
     
   };
   
 double G( double g, double  M1, double M2, double L1, double L2, double theta, double dtheta, double alpha, double dalpha){
   
-  return (-dalpha*dalpha*M2*L2*cos((alpha-theta)*M_PI/180)*sin((alpha-theta)*M_PI/180)+(M1+M2)*(g*sin(theta*M_PI/180)*cos((alpha-theta)*M_PI/180)-L1*dtheta*dtheta*sin((alpha-theta)*M_PI/180)-g*sin(alpha*M_PI/180)))/((M1+M2)*L2-M2*L2*cos((alpha-theta)*M_PI/180)*cos((alpha-theta)*M_PI/180));
+  return (-dalpha*dalpha*M2*L2*cos((alpha-theta))*sin((alpha-theta))+(M1+M2)*(g*sin(theta)*cos((alpha-theta))-L1*dtheta*dtheta*sin((alpha-theta))-g*sin(alpha)))/((M1+M2)*L2-M2*L2*cos((alpha-theta)*M_PI/180)*cos((alpha-theta)*M_PI/180));
     
   };
 
@@ -177,7 +177,9 @@ int main(){
   cout<<"Theta1= "<<Theta1<<"dTheta1= "<<"l1= "<<l1<<"m1= "<<m1<<endl; 
 
   //On passe maintenant à la méthode de résolution RK4 pour l'ordre 2 pour les équa diff couplé.
-
+  A.Theta=A.GetTheta()*M_PI/180.0;
+  B.Theta=B.GetTheta()*M_PI/180.0;
+  
   while (t<=T){
 
   kx1=A.GetdTheta()*h;
