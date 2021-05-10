@@ -47,6 +47,10 @@ public: //On commence par déclarer les variables qui materialiserons le point.
   double Getm()  {return m;}
   double Getx() {return l*sin(Theta*M_PI/180.0);}
   double Gety() {return -l*cos(Theta*M_PI/180.0);}
+  
+   //On définis aussi les énergie potentiels et ciunétique du point en fonction de l'angle qu'il fait avec la verticale et la longeur l. 
+  double Getec() {return (1/2.0)*m*pow(l*dTheta,2);}
+  double Getep() {return -m*g*l*cos(Theta);} 
 
   //On passe maintenant aux mutateurs. Ce sont des fonctions membres qui permettent d'attribuer et de changer la valeur d'une variable protégée. Cela nous permet ici d'initialiser nos variables.  
 
@@ -57,7 +61,8 @@ public: //On commence par déclarer les variables qui materialiserons le point.
   double SetdTheta(double dTheta0) {return dTheta=dTheta0;}
   double Setl(double l0) {return l=l0;}
   double Setm(double m0) {return m=m0;}
-
+  double Setec(double ec0) {return ec=ec0;}
+  double Setep(double ep0) {return ep=ep0;}
 
 
   
@@ -127,7 +132,9 @@ int main(){
   double t=0; //Le temps
   double h=0.001; //Le pas de RK4
   double T=10;  //Le temps maximum.  
-
+  double Ec=0; //Energie cinétique du système.
+  double Ep=0; //ENergie potentiel du système.
+  double E=0; //Energie totale du système.
   //On initialise les grandeurs utilisé dans RK4.
 
   double kx1=0, ky1=0, ku1=0, kv1=0;
@@ -218,6 +225,10 @@ int main(){
   A.y=A.Gety();
   B.x=A.Getx()+B.Getx();
   B.y=A.Gety()+B.Gety();
+  
+  Ec=A.Getec()+B.Getec();
+  Ep=A.Getep()+B.Getep();
+  E=Ec+Ep; 
 
   fichier2<<" "<<t<<" "<<xo<<" "<<yo<<endl;
   fichier2<<" "<<t<<" "<<A.x<<" "<<A.y<<endl; 
