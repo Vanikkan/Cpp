@@ -314,25 +314,24 @@ int main(){
   graphe<<"pause -1"<<endl;
   graphe<<"set terminal postscript"<<endl;
   graphe<<"set output \"Energie.ps\""<<endl;
-  //graphe<< "set terminal x11"<<endl;
+  graphe<< "set terminal x11"<<endl;
   graphe<<"replot"<<endl;
   system("gnuplot Energie.gnu");
 
   //Les positions des deux points:
 
-  ofstream graphe1("Position_pendule.gnu");
-  graphe1<<"set title \"Evolution de la position des masses au cours du temps\""<<endl;
+  ofstream graphe1("Position.gnu");
+  graphe1<<"set title \"Position des masses A et B au cours du temps\""<<endl;
   graphe1<<"set xlabel \"x\""<<endl;
   graphe1<<"set ylabel \"y\""<<endl;
-  graphe1<<"plot \"pendule_double_point_graphe.out\" using 1:2 linecolor 3 title 'A'  "<<endl;
-  graphe1<<"replot \"pendule_double_point_graphe.out\" using 3:4 linecolor 4 title 'B'  "<<endl;
-  graphe<<"pause -1"<<endl;
+  graphe1<<"plot \"pendule_double_point_graphe.out\" using 1:2 linecolor 4 title 'masse A'  "<<endl;
+  graphe1<<"replot \"pendule_double_point_graphe.out\" using 3:4 linecolor 7 title 'masse B'  "<<endl;
+  graphe1<<"pause -1"<<endl;
   graphe1<<"set terminal postscript"<<endl;
-  graphe1<<"set output \"Position_pendule.ps\""<<endl;
+  graphe1<<"set output \"Position.ps\""<<endl;
+  graphe1<< "set terminal x11"<<endl;
   graphe1<<"replot"<<endl;
-  // graphe1<< "set terminal x11"<<endl;
-  
-  system("gnuplot Position_pendule.gnu");
+  system("gnuplot Position.gnu");
   
   // Création du gif
    ofstream gif("animationpendule.gnu"); // création du fichier de sortie pour le gif
