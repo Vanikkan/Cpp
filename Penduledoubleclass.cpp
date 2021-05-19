@@ -26,11 +26,11 @@ public: //On commence par déclarer les variables qui materialiserons le point.
   //La distance du point par rapport à l'origine (la longueurs du pendule)
   double l;
 
-  //La masse de la amsse asscoié à ce point;
+  //La masse de la amsse assocoié à ce point
   double m;
 
-  //L'énergie cinétique et potentiel
-
+  //L'énergie potentiel et cinétique
+  
   double ec;
   double ep;
 
@@ -46,9 +46,9 @@ public: //On commence par déclarer les variables qui materialiserons le point.
   
   void init(double, double, double, double); //On crée la fonction initialisation qui va initialiser nos variables
 
-  //On déclare maintenant les variables au moyen de la commande "Get", ce sont nos accesseurs; ils vont nous permettre d'acceder aux données de notre classe privée. 
+  //On déclare maintenant les variables au moyen de la commande "Get", ce sont nos accesseurs. 
 
-  //On leur attribut la variable qu'il devront retourner. La commande "const" permet de fixer ces variables, car on ne veut pas de variables dynamique ici. 
+  //On leur attribut la variable qu'il devront retourner. Cela nous permet surtout de facilement définier les coordonnée cartésiennes du point en fonction de l'angle Theta et de l.
 
   double GetTheta()  {return Theta;}
   double GetdTheta() {return dTheta;}
@@ -57,22 +57,11 @@ public: //On commence par déclarer les variables qui materialiserons le point.
   double Getx() {return l*sin(Theta);}
   double Gety() {return -l*cos(Theta);}
 
-  //On définis aussi les énergie potentiels et ciunétique du point en fonction de l'angle qu'il fait avec la verticale et la longeur l. 
+  //On définis aussi les énergie potentiels et cinétique du point en fonction de l'angle qu'il fait avec la verticale et la longeur l. 
   double Getec() {return (1/2.0)*m*pow(l*dTheta,2);}
   double Getep() {return -m*g*l*cos(Theta);} 
 
-  //On passe maintenant aux mutateurs. Ce sont des fonctions membres qui permettent d'attribuer et de changer la valeur d'une variable protégée. Cela nous permet ici d'initialiser nos variables.  
-
-
-  double Setx(double x0) {return x=x0;}
-  double Sety(double y0) {return y=y0;}
-  double SetTheta(double Theta0) {return Theta=Theta0;}
-  double SetdTheta(double dTheta0) {return dTheta=dTheta0;}
-  double Setl(double l0) {return l=l0;}
-  double Setm(double m0) {return m=m0;}
-  double Setec(double ec0) {return ec=ec0;}
-  double Setep(double ep0) {return ep=ep0;}
-
+  
   
 };
 
@@ -88,15 +77,7 @@ public: //On commence par déclarer les variables qui materialiserons le point.
     m=m0;
 };
  
-//On définis maintenant notre constructeur de copie.
 
-point::point( point &point2){
-
-  Theta=point2.GetTheta();
-  dTheta=point2.GetdTheta();
-  l=point2.Getl();
-  m=point2.Getl();
-};
 
 // Pour éviter tout problème, on va demander à notre programme de commencer par initialiser toutes les variables de la classe point à 0 par défaut.
 
@@ -149,7 +130,7 @@ int main(){
   double h; //Le pas de RK4.
   double T;  //Le temps maximum.  
   double Ec=0; //Energie cinétique du système.
-  double Ep=0; //ENergie potentiel du système.
+  double Ep=0; //Energie potentiel du système.
   double E=0; //Energie totale du système.
   double Ebarre=0; //Moyenne de l'énergie totale
   
@@ -173,11 +154,13 @@ int main(){
 
   ifstream fichier("cond_init.txt"); 
 
-  //On en profite pour définir les fichiers de sortie.
+  //On en profite pour définir les deux fichiers de sortie (Pour les angles, et les coordonnées).
+
   ofstream fichier1("pendule_double.out");
   ofstream fichier2("pendule_double_point.out");
   ofstream fichier3("energie_systeme.out");
   ofstream fichier4("pendule_double_point_graphe.out");
+  ofstream fichier5("phase.out");
   
   //Grace à notre fichier d'initialisation, on peut attribuer des valeurs à nos différentes variables caractérisant nos points.
   fichier>>h;
@@ -214,9 +197,9 @@ int main(){
 
   double Ec0= A.Getec()+B.Getec();
   double Ep0=A.Getep()+B.Getep();
-  double E0= Ec0 +Ep0;
+  double E0=Ec0+Ep0;
 
-  cout<<"Ec0= "<<Ec0<<" Ep0= "<<Ep0<<" E= "<<E<<endl;
+  cout<<"Ec0= "<<Ec0<<" Ep0= "<<Ep0<<" E0= "<<E0<<endl;
   //Notre système étant conservatif, E doit rester constant au cours du temps. OBN utilisera cette valeurt plus tard pour la comparé à la valeur moyenne de celles obtenus au coiurs de la résolutions.  
   
   //On passe maintenant à la méthode de résolution RK4 pour l'ordre 2 pour les équa diff couplé.
@@ -274,7 +257,8 @@ int main(){
   fichier2<<" "<<endl;
   fichier3<<" "<<t<<" "<<Ec<<" "<<Ep<<" "<<E<<endl;
   fichier4<<" "<<A.x<<" "<<A.y<<" "<<B.x<<" "<<B.y<<endl;
-
+  fichier5<<" "<<B.Theta<<" "<<B.dTheta<<endl;
+  
   //On va calculer la moyenne de l'énergie total
 
   Ebarre+=E;
@@ -293,7 +277,8 @@ int main(){
 
   
   double delta= abs(Ebarre-E0)/E0;
-
+  
+  cout<<"L'énergie totale du système est de "<<E0<<endl;
   cout<<"L'énergie moyenne calculé est de "<<Ebarre<<endl;
   cout<<"L'écart relatif entre Ebarre et de E0 est de "<<delta<<endl;
 
@@ -304,7 +289,6 @@ int main(){
   //Les energies:
   
   ofstream graphe("Energie.gnu");
-  
   graphe<<"set title \"Evolution des énergie au cours du temps\""<<endl;
   graphe<<"set xlabel \"Temps t\""<<endl;
   graphe<<"set ylabel \"Energie (J)\""<<endl;
@@ -316,13 +300,11 @@ int main(){
   graphe<<"set output \"Energie.ps\""<<endl;
   graphe<< "set terminal x11"<<endl;
   graphe<<"replot"<<endl;
-  
   system("gnuplot Energie.gnu");
 
   //Les positions des deux points:
 
   ofstream graphe1("Position.gnu");
-  
   graphe1<<"set title \"Position des masses A et B au cours du temps\""<<endl;
   graphe1<<"set xlabel \"x\""<<endl;
   graphe1<<"set ylabel \"y\""<<endl;
@@ -333,8 +315,21 @@ int main(){
   graphe1<<"set output \"Position.ps\""<<endl;
   graphe1<< "set terminal x11"<<endl;
   graphe1<<"replot"<<endl;
-  
   system("gnuplot Position.gnu");
+
+   //Diagramme de phase
+  
+  ofstream graphe2("Phase.gnu");
+  graphe2<<"set title \"Représentation de la dérivée de l'angle de de la masse B en fonction de la valeur de l'angle\""<<endl;
+  graphe2<<"set xlabel \"Theta\""<<endl;
+  graphe2<<"set ylabel \"dTheta\""<<endl;
+  graphe2<<"plot \"phase.out\" using 1:2 linecolor 4 title 'dtheta'  "<<endl;
+  graphe2<<"pause -1"<<endl;
+  graphe2<<"set terminal postscript"<<endl;
+  graphe2<<"set output \"Phase.ps\""<<endl;
+  graphe2<< "set terminal x11"<<endl;
+  graphe2<<"replot"<<endl;
+  system("gnuplot Phase.gnu");
   
   // Création du gif
    ofstream gif("animationpendule.gnu"); // création du fichier de sortie pour le gif
